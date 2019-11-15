@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">desafio-mobile-daniel</string>
     <string name="action_settings">Sobre</string>
+
+    <string name="ip1">https://desafio.mobfiq.com.br/Search/Criteria</string>
+    <string name="ip2">http://sysint2.gsol.com.br:7082/gsol/php/?offset=</string> <!-- TESTE -->
 </resources>

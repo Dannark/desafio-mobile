@@ -10,13 +10,17 @@ import android.widget.ImageView;
 
 import java.io.InputStream;
 
+import br.com.dannark.desafio_mobile_daniel.Entity.Product;
+
 public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     ImageView bmImage;
     String urldisplay;
+    Product product;
 
-    public DownloadImageTask(ImageView bmImage, String urldisplay) {
+    public DownloadImageTask(ImageView bmImage, Product product, String urldisplay) {
         this.bmImage = bmImage;
         this.urldisplay = urldisplay;
+        this.product = product;
     }
 
     protected Bitmap doInBackground(String... urls) {
@@ -32,7 +36,8 @@ public class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
     }
 
     protected void onPostExecute(final Bitmap result) {
-        bmImage.setImageBitmap(result);
+        product.setImg(result);
+        bmImage.setImageBitmap(product.getImg());
 
     }
 }

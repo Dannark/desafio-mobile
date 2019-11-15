@@ -69,8 +69,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         String urlImage = products.get(i).getImagesURLs().get(0);
         urlImage = urlImage.replace("#width#", "300").replace("#height#", "300");
 
-        viewHolder.img.setImageBitmap(null);
-        new DownloadImageTask(viewHolder.img, urlImage).execute();
+        viewHolder.img.setImageBitmap(products.get(i).getImg());
+        if(products.get(i).getImg() == null) {
+            //load image first time
+            new DownloadImageTask(viewHolder.img, products.get(i), urlImage).execute();
+        }
 
     }
 

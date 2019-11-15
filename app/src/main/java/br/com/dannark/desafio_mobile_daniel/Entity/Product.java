@@ -1,5 +1,6 @@
 package br.com.dannark.desafio_mobile_daniel.Entity;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ public class Product {
     String value;
     String total;
     String rate;
+
+    Bitmap img;
 
     public ArrayList<String> imagesURLs;
 
@@ -70,5 +73,14 @@ public class Product {
 
     public String getRate() {
         return rate;
+    }
+
+
+    public Bitmap getImg() {
+        return img;
+    }
+
+    public void setImg(Bitmap img) {
+        this.img = img;
     }
 }

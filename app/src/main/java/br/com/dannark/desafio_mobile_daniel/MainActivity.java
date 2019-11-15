@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -22,6 +23,11 @@ import br.com.dannark.desafio_mobile_daniel.Utilits.Resposta;
 
 public class MainActivity extends AppCompatActivity implements Resposta {
 
+    RecyclerView recyclerView;
+    RecyclerView.LayoutManager layoutManager;
+    MyAdapter adapter;
+
+
     ArrayList<Product> products = new ArrayList<>();
 
     private boolean loading = true;
@@ -31,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements Resposta {
 
     EditText searchBox;
     ProgressBar loader;
+    ProgressBar bottomloader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,48 +46,39 @@ public class MainActivity extends AppCompatActivity implements Resposta {
 
         context = getApplication();
 
-        new PHPConnection(context,"https://desafio.mobfiq.com.br/Search/Criteria",
-                "", indexPage, 10, MainActivity.this).execute();
+        //INSTANTIATE / SETUP LIST
+        recyclerView = (RecyclerView) findViewById(R.id.imagegallery);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new GridLayoutManager(getApplicationContext(), 2);
+        recyclerView.setLayoutManager(layoutManager);
+        adapter = new MyAdapter(products);
+        recyclerView.setAdapter(adapter);
+        loadMoreItems();
 
+        new PHPConnection(context,getString(R.string.ip2)+indexPage,"", indexPage, 10, MainActivity.this).execute();
 
         searchBox = (EditText) findViewById(R.id.searchBox);
         loader = (ProgressBar) findViewById(R.id.loader);
+        bottomloader = (ProgressBar) findViewById(R.id.bottomloader);
     }
 
-    void updateItems(){
-
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.imagegallery);
-        recyclerView.setHasFixedSize(true);
-
-        final RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getApplicationContext(), 2);
-        recyclerView.setLayoutManager(layoutManager);
-
-        MyAdapter adapter = new MyAdapter(products);
-        recyclerView.setAdapter(adapter);
-
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
-        {
+    void loadMoreItems(){
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy)
-            {
-                if(dy > 0) //check for scroll down
-                {
-                    int visibleItemCount = layoutManager.getChildCount();
-                    int totalItemCount = layoutManager.getItemCount();
-                    int pastVisiblesItems = ((GridLayoutManager) layoutManager).findFirstVisibleItemPosition();
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                if (!recyclerView.canScrollVertically(1)) {
 
                     if (loading)
                     {
-                        if ( (visibleItemCount + pastVisiblesItems) >= totalItemCount)
-                        {
-                            loading = false;
+                        loading = false;
 
-                            Log.e("MainActivity","CARREGA MAIS ITENS");
-                            // CARREGA MAIS ITENS
-                            indexPage+=10;
-                            new PHPConnection(context,"https://desafio.mobfiq.com.br/Search/Criteria",
-                                    "", indexPage, 10, MainActivity.this).execute();
-                        }
+                        // CARREGA MAIS ITENS
+                        indexPage+=10;
+
+                        new PHPConnection(context,getString(R.string.ip2)+indexPage,"", indexPage, 10, MainActivity.this).execute();
+                        bottomloader.setVisibility(View.VISIBLE);
                     }
                 }
             }
@@ -90,14 +88,16 @@ public class MainActivity extends AppCompatActivity implements Resposta {
     @Override
     public void callBack(Object param) {
         products.addAll( (ArrayList<Product>)param );
+        Log.e("MainActivity","Total:"+products.size()+" indexPage="+indexPage);
 
         runOnUiThread(new Runnable() {
-
             @Override
             public void run() {
-                updateItems();
-                loading = true;
+                adapter.notifyDataSetChanged();
+
                 loader.setVisibility(View.GONE);
+                bottomloader.setVisibility(View.GONE);
+                loading = true;
             }
         });
     }
@@ -108,9 +108,7 @@ public class MainActivity extends AppCompatActivity implements Resposta {
 
         products.clear();
 
-        Log.e("MainActivity","inputText="+inputText);
-        new PHPConnection(context,"https://desafio.mobfiq.com.br/Search/Criteria",
-                inputText, indexPage, 10, MainActivity.this).execute();
+        new PHPConnection(context,getString(R.string.ip1), inputText, indexPage, 10, MainActivity.this).execute();
 
     }
 }
